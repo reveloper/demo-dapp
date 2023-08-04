@@ -34,9 +34,8 @@ function generateInitialData(ownerAddressHex: string): Cell {
 }
 
 function generateStateInit(data: Cell): string {
-	const stateInit = new StateInit({ code: initCodeCell, data });
+	const stateInit = { code: initCodeCell, data };
 	const cell = new Cell();
-	stateInit.writeTo(cell);
 
 	return callToBase64(cell);
 }
@@ -54,10 +53,7 @@ function callToBase64(cell: Cell): string {
 // }
 
 function generateContractAddress(initDataCell: Cell): string {
-	return calculateContractAddress({
-		workchain: 0,
-		init: generateStateInit(initDataCell),
-	}).toString();
+	return calculateContractAddress((0, initDataCell), initDataCell)).toString();
 
 }
 
