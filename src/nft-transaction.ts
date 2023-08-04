@@ -1,5 +1,5 @@
 import { Base64 } from '@tonconnect/protocol';
-import { Address, beginCell, contractAddress as calculateContractAddress, Cell, StateInit } from '@ton/ton';
+import { Address, beginCell, contractAddress, Cell, StateInit, storeStateInit } from '@ton/ton';
 
 
 const OFFCHAIN_CONTENT_PREFIX = 0x01;
@@ -34,10 +34,19 @@ function generateInitialData(ownerAddressHex: string): Cell {
 }
 
 function generateStateInit(data: Cell): string {
-	const stateInit = { code: initCodeCell, data };
-	const cell = new Cell();
 
-	return callToBase64(cell);
+	const codeCell = Cell.fromBoc(Buffer.from(initCodeCell))[0];
+
+	const stateInit = beginCell().
+	    storeBit(0). // No split_depth
+		storeBit(0). // No special
+		storeBit(1). // We have code
+		storeRef(codeCell).
+		storeBit(1). // We have data
+		storeRef(data).
+		storeBit(0). // No library
+		endCell();
+	return callToBase64(stateInit);
 }
 
 function callToBase64(cell: Cell): string {
@@ -53,8 +62,19 @@ function callToBase64(cell: Cell): string {
 // }
 
 function generateContractAddress(initDataCell: Cell): string {
-	return calculateContractAddress((0, initDataCell), initDataCell)).toString();
 
+	const codeCell = Cell.fromBoc(Buffer.from(initCodeCell))[0];
+
+	const stateInit = beginCell().
+	storeBit(0). // No split_depth
+		storeBit(0). // No special
+		storeBit(1). // We have code
+		storeRef(codeCell).
+		storeBit(1). // We have data
+		storeRef(initDataCell).
+		storeBit(0). // No library
+		endCell();
+	return new Address(0, stateInit.hash()).toString();
 }
 
 export function getAddressAndStateInit(ownerAddress: string): { address: string; stateInit: string } {
