@@ -1,5 +1,6 @@
 import { Base64 } from '@tonconnect/protocol';
-import { Address, beginCell, contractAddress as calculateContractAddress, Cell, StateInit } from 'ton';
+import { Address, beginCell, contractAddress as calculateContractAddress, Cell, StateInit } from '@ton/ton';
+
 
 const OFFCHAIN_CONTENT_PREFIX = 0x01;
 const nftUri = 'https://raw.githubusercontent.com/siandreev/nft/main/demo-nft-data.json';
